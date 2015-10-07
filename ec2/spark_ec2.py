@@ -42,6 +42,7 @@ import warnings
 from datetime import datetime
 from optparse import OptionParser
 from sys import stderr
+from python_stuff import PYTHON_INSTALL_COMMAND
 
 if sys.version < "3":
     from urllib2 import urlopen, Request, HTTPError
@@ -821,6 +822,22 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
         + "git clone {r} -b {b} spark-ec2".format(r=opts.spark_ec2_git_repo,
                                                   b=opts.spark_ec2_git_branch)
     )
+
+    print("Installing python stuff on master")
+    ssh(
+        host=master,
+        opts=opts,
+        command=PYTHON_INSTALL_COMMAND
+    )
+
+    for slave in slave_nodes:
+        print("Installing python stuff on slaves")
+        slave_address = get_dns_name(slave, opts.private_ips)
+        ssh(
+            host=slave_address,
+            opts=opts,
+            command=PYTHON_INSTALL_COMMAND
+        )
 
     print("Deploying files to master...")
     deploy_files(
