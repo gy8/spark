@@ -95,7 +95,8 @@ DEFAULT_SPARK_VERSION = SPARK_EC2_VERSION
 DEFAULT_SPARK_GITHUB_REPO = "https://github.com/apache/spark"
 
 # Default location to get the spark-ec2 scripts (and ami-list) from
-DEFAULT_SPARK_EC2_GITHUB_REPO = "https://github.com/amplab/spark-ec2"
+# DEFAULT_SPARK_EC2_GITHUB_REPO = "https://github.com/amplab/spark-ec2"
+DEFAULT_SPARK_EC2_GITHUB_REPO = "https://github.com/gy8/spark-ec2"
 DEFAULT_SPARK_EC2_BRANCH = "branch-1.5"
 
 
@@ -340,6 +341,16 @@ def parse_args():
                     print("ERROR: The environment variable AWS_SECRET_ACCESS_KEY must be set",
                           file=stderr)
                     sys.exit(1)
+                # check for spark aws credentials to be set in spark-env.sh
+                if os.getenv('SPARK_AWS_ACCESS_KEY_ID') is None:
+                    print("ERROR: The environment variable SPARK_AWS_ACCESS_KEY_ID must be set :P",
+                          file=stderr)
+                    sys.exit(1)
+                if os.getenv('SPARK_AWS_SECRET_ACCESS_KEY') is None:
+                    print("ERROR: The environment variable SPARK_AWS_SECRET_ACCESS_KEY must be set :P",
+                          file=stderr)
+                    sys.exit(1)
+
     return (opts, action, cluster_name)
 
 
@@ -1084,7 +1095,9 @@ def deploy_files(conn, root_dir, opts, master_nodes, slave_nodes, modules):
         "tachyon_version": tachyon_v,
         "hadoop_major_version": opts.hadoop_major_version,
         "spark_worker_instances": worker_instances_str,
-        "spark_master_opts": opts.master_opts
+        "spark_master_opts": opts.master_opts,
+        "spark_aws_access_key_id": os.getenv('SPARK_AWS_ACCESS_KEY_ID'),
+        "spark_aws_secret_access_key": os.getenv('SPARK_AWS_SECRET_ACCESS_KEY')
     }
 
     if opts.copy_aws_credentials:
