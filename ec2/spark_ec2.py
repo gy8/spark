@@ -28,6 +28,7 @@ import logging
 import os
 import os.path
 import pipes
+import Queue
 import random
 import shutil
 import string
@@ -37,6 +38,7 @@ import sys
 import tarfile
 import tempfile
 import textwrap
+import threading
 import time
 import warnings
 from datetime import datetime
@@ -834,21 +836,37 @@ def setup_cluster(conn, master_nodes, slave_nodes, opts, deploy_ssh_key):
                                                   b=opts.spark_ec2_git_branch)
     )
 
-    print("Installing python stuff on master")
-    ssh(
-        host=master,
-        opts=opts,
-        command=PYTHON_INSTALL_COMMAND
-    )
+    print("Installing python stuff in nodes")
 
+    def parallel_ssh(queue):
+        queue_empty = False
+        while not queue_empty:
+            try:
+                current_host = queue.get(False)
+                ssh(
+                    host=current_host,
+                    opts=opts,
+                    command=PYTHON_INSTALL_COMMAND
+                )
+            except Queue.Empty:
+                queue_empty = True
+
+    jobs_queue = Queue.Queue()
+    jobs_queue.put(master)
     for slave in slave_nodes:
-        print("Installing python stuff on slaves")
         slave_address = get_dns_name(slave, opts.private_ips)
-        ssh(
-            host=slave_address,
-            opts=opts,
-            command=PYTHON_INSTALL_COMMAND
-        )
+        jobs_queue.put(slave_address)
+
+    thread_count = 20
+    thread_workers = []
+    for thread_i in range(thread_count):
+        worker = threading.Thread(target=parallel_ssh,
+                                  args=(jobs_queue,))
+        worker.start()
+        thread_workers.append(worker)
+
+    for worker in thread_workers:
+        worker.join()
 
     print("Deploying files to master...")
     deploy_files(
