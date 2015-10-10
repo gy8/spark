@@ -12,6 +12,7 @@ sudo yum install -y libxslt-python27.x86_64 &&
 sudo yum install -y libxml2-python27.x86_64 &&
 sudo yum install -y mysql-devel &&
 sudo yum install -y libffi-devel &&
+sudo yum install -y vim +ruby &&
 pip-2.7 install boto &&
 pip-2.7 install haversine &&
 pip-2.7 install lxml &&
