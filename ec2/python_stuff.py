@@ -40,6 +40,8 @@ pip-2.7 install matplotlib &&
 pip-2.7 install seaborn &&
 pip-2.7 install nltk &&
 pip-2.7 install gensim &&
+pip-2.7 install clint &&
+pip-2.7 install filechunkio &&
 pip-2.7 install googlemaps &&
 pip-2.7 install jupyter &&
 pip-2.7 install python-slugify &&
