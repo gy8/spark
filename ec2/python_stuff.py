@@ -43,6 +43,7 @@ pip-2.7 install gensim &&
 pip-2.7 install clint &&
 pip-2.7 install filechunkio &&
 pip-2.7 install googlemaps &&
+pip-2.7 install simplejson &&
 pip-2.7 install jupyter &&
 pip-2.7 install python-slugify &&
 pip-2.7 install phonenumbers &&
